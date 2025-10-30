@@ -20,6 +20,7 @@ import PlusIcon from '../../icons/plus.svg';
 import RemoveIcon from '../../icons/remove.svg';
 import SendIcon from '../../icons/send.svg';
 import EmojiIcon from '../../icons/smile.svg';
+import RobotIcon from '../../icons/robot.svg';
 
 import 'emoji-mart/css/emoji-mart.css';
 
@@ -69,6 +70,39 @@ class Chat extends Component {
 	handleSendClick = (event) => {
 		event.preventDefault();
 		this.handleSubmit(this.state.text);
+	};
+
+	handleRobotClick = async (event) => {
+		event.preventDefault();
+		try {
+			// Make a dummy API call to simulate robot functionality
+			const response = await fetch('/api/robot-message', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ 
+					message: this.state.text,
+					userId: this.props.uid,
+					roomId: this.props.room?._id
+				}),
+			});
+			
+			if (response.ok) {
+				const data = await response.json();
+				// If the API returns a message to be added to the chat
+				if (data.message) {
+					// If there's a method to send a message, use it
+					if (this.props.onSubmit) {
+						this.props.onSubmit(data.message);
+					}
+				}
+			} else {
+				console.error('Robot API call failed:', response.status);
+			}
+		} catch (error) {
+			console.error('Error with robot API call:', error);
+		}
 	};
 
 	handleSubmit = (text) => {
@@ -242,9 +276,14 @@ class Chat extends Component {
 										</ComposerAction>
 									)}
 									{text.length > 0 && (
-										<ComposerAction onClick={this.handleSendClick}>
-											<SendIcon width={20} height={20} />
-										</ComposerAction>
+										<>
+											<ComposerAction onClick={this.handleRobotClick}>
+												<RobotIcon width={20} height={20} />
+											</ComposerAction>
+											<ComposerAction onClick={this.handleSendClick}>
+												<SendIcon width={20} height={20} />
+											</ComposerAction>
+										</>
 									)}
 								</ComposerActions>
 							}
